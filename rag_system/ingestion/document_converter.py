@@ -1,6 +1,6 @@
 from typing import List, Tuple, Dict, Any
 from docling.document_converter import DocumentConverter as DoclingConverter, PdfFormatOption
-from docling.datamodel.pipeline_options import PdfPipelineOptions, OcrMacOptions
+from docling.datamodel.pipeline_options import PdfPipelineOptions, EasyOcrOptions
 from docling.datamodel.base_models import InputFormat
 import fitz  # PyMuPDF for quick text inspection
 import os
@@ -35,7 +35,7 @@ class DocumentConverter:
             # --- Converter WITH OCR (fallback) ---
             pipeline_ocr = PdfPipelineOptions()
             pipeline_ocr.do_ocr = True
-            ocr_options = OcrMacOptions(force_full_page_ocr=True)
+            ocr_options = EasyOcrOptions(force_full_page_ocr=True)
             pipeline_ocr.ocr_options = ocr_options
             format_ocr = {
                 InputFormat.PDF: PdfFormatOption(pipeline_options=pipeline_ocr)
