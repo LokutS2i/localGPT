@@ -1,8 +1,15 @@
-const API_BASE_URL = 'http://localhost:8000';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8000';
 
 // 🆕 Simple UUID generator for client-side message IDs
 export const generateUUID = () => {
-  if (typeof window !== 'undefined' && window.crypto && window.crypto.randomUUID) {
+  if (
+    typeof window !== 'undefined' &&
+    window.crypto &&
+    window.crypto.randomUUID
+  ) {
     return window.crypto.randomUUID();
   }
   // Fallback for older browsers or non-secure contexts
@@ -110,8 +117,12 @@ class ChatAPI {
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-        throw new Error(`Chat API error: ${errorData.error || response.statusText}`);
+        const errorData = await response
+          .json()
+          .catch(() => ({ error: 'Unknown error' }));
+        throw new Error(
+          `Chat API error: ${errorData.error || response.statusText}`
+        );
       }
 
       return await response.json();
@@ -122,10 +133,12 @@ class ChatAPI {
   }
 
   // Convert ChatMessage array to conversation history format
-  messagesToHistory(messages: ChatMessage[]): Array<{ role: 'user' | 'assistant'; content: string }> {
+  messagesToHistory(
+    messages: ChatMessage[]
+  ): Array<{ role: 'user' | 'assistant'; content: string }> {
     return messages
-      .filter(msg => typeof msg.content === 'string' && msg.content.trim())
-      .map(msg => ({
+      .filter((msg) => typeof msg.content === 'string' && msg.content.trim())
+      .map((msg) => ({
         role: msg.sender,
         content: msg.content as string,
       }));
@@ -145,7 +158,10 @@ class ChatAPI {
     }
   }
 
-  async createSession(title: string = 'New Chat', model: string = 'llama3.2:latest'): Promise<ChatSession> {
+  async createSession(
+    title: string = 'New Chat',
+    model: string = 'llama3.2:latest'
+  ): Promise<ChatSession> {
     try {
       const response = await fetch(`${API_BASE_URL}/sessions`, {
         method: 'POST',
@@ -167,7 +183,9 @@ class ChatAPI {
     }
   }
 
-  async getSession(sessionId: string): Promise<{ session: ChatSession; messages: ChatMessage[] }> {
+  async getSession(
+    sessionId: string
+  ): Promise<{ session: ChatSession; messages: ChatMessage[] }> {
     try {
       const response = await fetch(`${API_BASE_URL}/sessions/${sessionId}`);
       if (!response.ok) {
@@ -183,12 +201,12 @@ class ChatAPI {
   async sendSessionMessage(
     sessionId: string,
     message: string,
-    opts: { 
-      model?: string; 
-      composeSubAnswers?: boolean; 
-      decompose?: boolean; 
-      aiRerank?: boolean; 
-      contextExpand?: boolean; 
+    opts: {
+      model?: string;
+      composeSubAnswers?: boolean;
+      decompose?: boolean;
+      aiRerank?: boolean;
+      contextExpand?: boolean;
       verify?: boolean;
       // ✨ NEW RETRIEVAL PARAMETERS
       retrievalK?: number;
@@ -201,33 +219,62 @@ class ChatAPI {
     } = {}
   ): Promise<SessionChatResponse & { source_documents: any[] }> {
     try {
-      const response = await fetch(`${API_BASE_URL}/sessions/${sessionId}/messages`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message,
-          ...(opts.model && { model: opts.model }),
-          ...(typeof opts.composeSubAnswers === 'boolean' && { compose_sub_answers: opts.composeSubAnswers }),
-          ...(typeof opts.decompose === 'boolean' && { query_decompose: opts.decompose }),
-          ...(typeof opts.aiRerank === 'boolean' && { ai_rerank: opts.aiRerank }),
-          ...(typeof opts.contextExpand === 'boolean' && { context_expand: opts.contextExpand }),
-          ...(typeof opts.verify === 'boolean' && { verify: opts.verify }),
-          // ✨ ADD NEW RETRIEVAL PARAMETERS
-          ...(typeof opts.retrievalK === 'number' && { retrieval_k: opts.retrievalK }),
-          ...(typeof opts.contextWindowSize === 'number' && { context_window_size: opts.contextWindowSize }),
-          ...(typeof opts.rerankerTopK === 'number' && { reranker_top_k: opts.rerankerTopK }),
-          ...(typeof opts.searchType === 'string' && { search_type: opts.searchType }),
-          ...(typeof opts.denseWeight === 'number' && { dense_weight: opts.denseWeight }),
-          ...(typeof opts.forceRag === 'boolean' && { force_rag: opts.forceRag }),
-          ...(typeof opts.provencePrune === 'boolean' && { provence_prune: opts.provencePrune }),
-        }),
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/sessions/${sessionId}/messages`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            message,
+            ...(opts.model && { model: opts.model }),
+            ...(typeof opts.composeSubAnswers === 'boolean' && {
+              compose_sub_answers: opts.composeSubAnswers,
+            }),
+            ...(typeof opts.decompose === 'boolean' && {
+              query_decompose: opts.decompose,
+            }),
+            ...(typeof opts.aiRerank === 'boolean' && {
+              ai_rerank: opts.aiRerank,
+            }),
+            ...(typeof opts.contextExpand === 'boolean' && {
+              context_expand: opts.contextExpand,
+            }),
+            ...(typeof opts.verify === 'boolean' && { verify: opts.verify }),
+            // ✨ ADD NEW RETRIEVAL PARAMETERS
+            ...(typeof opts.retrievalK === 'number' && {
+              retrieval_k: opts.retrievalK,
+            }),
+            ...(typeof opts.contextWindowSize === 'number' && {
+              context_window_size: opts.contextWindowSize,
+            }),
+            ...(typeof opts.rerankerTopK === 'number' && {
+              reranker_top_k: opts.rerankerTopK,
+            }),
+            ...(typeof opts.searchType === 'string' && {
+              search_type: opts.searchType,
+            }),
+            ...(typeof opts.denseWeight === 'number' && {
+              dense_weight: opts.denseWeight,
+            }),
+            ...(typeof opts.forceRag === 'boolean' && {
+              force_rag: opts.forceRag,
+            }),
+            ...(typeof opts.provencePrune === 'boolean' && {
+              provence_prune: opts.provencePrune,
+            }),
+          }),
+        }
+      );
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-        throw new Error(`Session chat error: ${errorData.error || response.statusText}`);
+        const errorData = await response
+          .json()
+          .catch(() => ({ error: 'Unknown error' }));
+        throw new Error(
+          `Session chat error: ${errorData.error || response.statusText}`
+        );
       }
 
       return await response.json();
@@ -237,15 +284,21 @@ class ChatAPI {
     }
   }
 
-  async deleteSession(sessionId: string): Promise<{ message: string; deleted_session_id: string }> {
+  async deleteSession(
+    sessionId: string
+  ): Promise<{ message: string; deleted_session_id: string }> {
     try {
       const response = await fetch(`${API_BASE_URL}/sessions/${sessionId}`, {
         method: 'DELETE',
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-        throw new Error(`Delete session error: ${errorData.error || response.statusText}`);
+        const errorData = await response
+          .json()
+          .catch(() => ({ error: 'Unknown error' }));
+        throw new Error(
+          `Delete session error: ${errorData.error || response.statusText}`
+        );
       }
 
       return await response.json();
@@ -255,19 +308,29 @@ class ChatAPI {
     }
   }
 
-  async renameSession(sessionId: string, newTitle: string): Promise<{ message: string; session: ChatSession }> {
+  async renameSession(
+    sessionId: string,
+    newTitle: string
+  ): Promise<{ message: string; session: ChatSession }> {
     try {
-      const response = await fetch(`${API_BASE_URL}/sessions/${sessionId}/rename`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ title: newTitle }),
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/sessions/${sessionId}/rename`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ title: newTitle }),
+        }
+      );
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-        throw new Error(`Rename session error: ${errorData.error || response.statusText}`);
+        const errorData = await response
+          .json()
+          .catch(() => ({ error: 'Unknown error' }));
+        throw new Error(
+          `Rename session error: ${errorData.error || response.statusText}`
+        );
       }
 
       return await response.json();
@@ -277,13 +340,20 @@ class ChatAPI {
     }
   }
 
-  async cleanupEmptySessions(): Promise<{ message: string; cleanup_count: number }> {
+  async cleanupEmptySessions(): Promise<{
+    message: string;
+    cleanup_count: number;
+  }> {
     try {
       const response = await fetch(`${API_BASE_URL}/sessions/cleanup`);
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-        throw new Error(`Cleanup sessions error: ${errorData.error || response.statusText}`);
+        const errorData = await response
+          .json()
+          .catch(() => ({ error: 'Unknown error' }));
+        throw new Error(
+          `Cleanup sessions error: ${errorData.error || response.statusText}`
+        );
       }
 
       return await response.json();
@@ -293,9 +363,12 @@ class ChatAPI {
     }
   }
 
-  async uploadFiles(sessionId: string, files: File[]): Promise<{ 
-    message: string; 
-    uploaded_files: {filename: string, stored_path: string}[]; 
+  async uploadFiles(
+    sessionId: string,
+    files: File[]
+  ): Promise<{
+    message: string;
+    uploaded_files: { filename: string; stored_path: string }[];
   }> {
     try {
       const formData = new FormData();
@@ -303,14 +376,21 @@ class ChatAPI {
         formData.append('files', file, file.name);
       });
 
-      const response = await fetch(`${API_BASE_URL}/sessions/${sessionId}/upload`, {
-        method: 'POST',
-        body: formData,
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/sessions/${sessionId}/upload`,
+        {
+          method: 'POST',
+          body: formData,
+        }
+      );
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Upload failed' }));
-        throw new Error(`Upload error: ${errorData.error || response.statusText}`);
+        const errorData = await response
+          .json()
+          .catch(() => ({ error: 'Upload failed' }));
+        throw new Error(
+          `Upload error: ${errorData.error || response.statusText}`
+        );
       }
       return await response.json();
     } catch (error) {
@@ -321,16 +401,23 @@ class ChatAPI {
 
   async indexDocuments(sessionId: string): Promise<{ message: string }> {
     try {
-      const response = await fetch(`${API_BASE_URL}/sessions/${sessionId}/index`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/sessions/${sessionId}/index`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Indexing failed' }));
-        throw new Error(`Indexing error: ${errorData.error || response.statusText}`);
+        const errorData = await response
+          .json()
+          .catch(() => ({ error: 'Indexing failed' }));
+        throw new Error(
+          `Indexing error: ${errorData.error || response.statusText}`
+        );
       }
       return await response.json();
     } catch (error) {
@@ -340,9 +427,12 @@ class ChatAPI {
   }
 
   // Legacy upload function - can be removed if no longer needed
-  async uploadPDFs(sessionId: string, files: File[]): Promise<{ 
-    message: string; 
-    uploaded_files: any[]; 
+  async uploadPDFs(
+    sessionId: string,
+    files: File[]
+  ): Promise<{
+    message: string;
+    uploaded_files: any[];
     processing_results: any[];
     session_documents: any[];
     total_session_documents: number;
@@ -356,33 +446,43 @@ class ChatAPI {
         }
         totalSize += file.size;
         const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
-        console.log(`📄 File ${file.name}: ${sizeMB}MB (${file.size} bytes), type: ${file.type}`);
+        console.log(
+          `📄 File ${file.name}: ${sizeMB}MB (${file.size} bytes), type: ${file.type}`
+        );
       }
-      
+
       const totalSizeMB = (totalSize / (1024 * 1024)).toFixed(2);
       console.log(`📄 Total upload size: ${totalSizeMB}MB`);
-      
-      if (totalSize > 50 * 1024 * 1024) { // 50MB limit
+
+      if (totalSize > 50 * 1024 * 1024) {
+        // 50MB limit
         throw new Error(`Total file size ${totalSizeMB}MB exceeds 50MB limit`);
       }
-      
+
       const formData = new FormData();
-      
+
       // Use a generic field name 'file' that the backend expects
       let i = 0;
       for (const file of files) {
         formData.append(`file_${i}`, file, file.name);
         i++;
       }
-      
-      const response = await fetch(`${API_BASE_URL}/sessions/${sessionId}/upload`, {
-        method: 'POST',
-        body: formData,
-      });
+
+      const response = await fetch(
+        `${API_BASE_URL}/sessions/${sessionId}/upload`,
+        {
+          method: 'POST',
+          body: formData,
+        }
+      );
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-        throw new Error(`Upload error: ${errorData.error || response.statusText}`);
+        const errorData = await response
+          .json()
+          .catch(() => ({ error: 'Unknown error' }));
+        throw new Error(
+          `Upload error: ${errorData.error || response.statusText}`
+        );
       }
 
       return await response.json();
@@ -405,8 +505,8 @@ class ChatAPI {
 
   // Create a new ChatMessage with UUID (for loading states)
   createMessage(
-    content: string, 
-    sender: 'user' | 'assistant', 
+    content: string,
+    sender: 'user' | 'assistant',
     isLoading = false
   ): ChatMessage {
     return {
@@ -427,7 +527,9 @@ class ChatAPI {
     return resp.json();
   }
 
-  async getSessionDocuments(sessionId: string): Promise<{ files: string[]; file_count: number; session: ChatSession }> {
+  async getSessionDocuments(
+    sessionId: string
+  ): Promise<{ files: string[]; file_count: number; session: ChatSession }> {
     const resp = await fetch(`${API_BASE_URL}/sessions/${sessionId}/documents`);
     if (!resp.ok) {
       throw new Error(`Failed to fetch session documents: ${resp.status}`);
@@ -437,7 +539,11 @@ class ChatAPI {
 
   // ---------- Index endpoints ----------
 
-  async createIndex(name: string, description?: string, metadata: Record<string, unknown> = {}): Promise<{ index_id: string }> {
+  async createIndex(
+    name: string,
+    description?: string,
+    metadata: Record<string, unknown> = {}
+  ): Promise<{ index_id: string }> {
     const resp = await fetch(`${API_BASE_URL}/indexes`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -450,10 +556,16 @@ class ChatAPI {
     return resp.json();
   }
 
-  async uploadFilesToIndex(indexId: string, files: File[]): Promise<{ message: string; uploaded_files: any[] }> {
+  async uploadFilesToIndex(
+    indexId: string,
+    files: File[]
+  ): Promise<{ message: string; uploaded_files: any[] }> {
     const fd = new FormData();
     files.forEach((f) => fd.append('files', f, f.name));
-    const resp = await fetch(`${API_BASE_URL}/indexes/${indexId}/upload`, { method: 'POST', body: fd });
+    const resp = await fetch(`${API_BASE_URL}/indexes/${indexId}/upload`, {
+      method: 'POST',
+      body: fd,
+    });
     if (!resp.ok) {
       const err = await resp.json().catch(() => ({}));
       throw new Error(`Upload to index error: ${err.error || resp.statusText}`);
@@ -461,27 +573,30 @@ class ChatAPI {
     return resp.json();
   }
 
-  async buildIndex(indexId: string, opts: { 
-    latechunk?: boolean; 
-    doclingChunk?: boolean;
-    chunkSize?: number;
-    chunkOverlap?: number;
-    retrievalMode?: string;
-    windowSize?: number;
-    enableEnrich?: boolean;
-    embeddingModel?: string;
-    enrichModel?: string;
-    overviewModel?: string;
-    batchSizeEmbed?: number;
-    batchSizeEnrich?: number;
-  } = {}): Promise<{ message: string }> {
+  async buildIndex(
+    indexId: string,
+    opts: {
+      latechunk?: boolean;
+      doclingChunk?: boolean;
+      chunkSize?: number;
+      chunkOverlap?: number;
+      retrievalMode?: string;
+      windowSize?: number;
+      enableEnrich?: boolean;
+      embeddingModel?: string;
+      enrichModel?: string;
+      overviewModel?: string;
+      batchSizeEmbed?: number;
+      batchSizeEnrich?: number;
+    } = {}
+  ): Promise<{ message: string }> {
     try {
       const response = await fetch(`${API_BASE_URL}/indexes/${indexId}/build`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           latechunk: opts.latechunk ?? false,
           doclingChunk: opts.doclingChunk ?? false,
           chunkSize: opts.chunkSize ?? 512,
@@ -498,8 +613,12 @@ class ChatAPI {
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-        throw new Error(`Build index error: ${errorData.error || response.statusText}`);
+        const errorData = await response
+          .json()
+          .catch(() => ({ error: 'Unknown error' }));
+        throw new Error(
+          `Build index error: ${errorData.error || response.statusText}`
+        );
       }
 
       return await response.json();
@@ -509,8 +628,14 @@ class ChatAPI {
     }
   }
 
-  async linkIndexToSession(sessionId: string, indexId: string): Promise<{ message: string }> {
-    const resp = await fetch(`${API_BASE_URL}/sessions/${sessionId}/indexes/${indexId}`, { method: 'POST' });
+  async linkIndexToSession(
+    sessionId: string,
+    indexId: string
+  ): Promise<{ message: string }> {
+    const resp = await fetch(
+      `${API_BASE_URL}/sessions/${sessionId}/indexes/${indexId}`,
+      { method: 'POST' }
+    );
     if (!resp.ok) {
       const err = await resp.json().catch(() => ({}));
       throw new Error(`Link index error: ${err.error || resp.statusText}`);
@@ -526,9 +651,12 @@ class ChatAPI {
     return resp.json();
   }
 
-  async getSessionIndexes(sessionId: string): Promise<{ indexes: any[]; total: number }> {
+  async getSessionIndexes(
+    sessionId: string
+  ): Promise<{ indexes: any[]; total: number }> {
     const resp = await fetch(`${API_BASE_URL}/sessions/${sessionId}/indexes`);
-    if (!resp.ok) throw new Error(`Failed to get session indexes: ${resp.status}`);
+    if (!resp.ok)
+      throw new Error(`Failed to get session indexes: ${resp.status}`);
     return resp.json();
   }
 
@@ -537,7 +665,7 @@ class ChatAPI {
       method: 'DELETE',
     });
     if (!resp.ok) {
-      const data = await resp.json().catch(() => ({ error: 'Unknown error'}));
+      const data = await resp.json().catch(() => ({ error: 'Unknown error' }));
       throw new Error(data.error || `Failed to delete index: ${resp.status}`);
     }
     return resp.json();
@@ -564,27 +692,48 @@ class ChatAPI {
       forceRag?: boolean;
       provencePrune?: boolean;
     },
-    onEvent: (event: { type: string; data: any }) => void,
+    onEvent: (event: { type: string; data: any }) => void
   ): Promise<void> {
-    const { query, model, session_id, table_name, composeSubAnswers, decompose, aiRerank, contextExpand, verify, retrievalK, contextWindowSize, rerankerTopK, searchType, denseWeight, forceRag, provencePrune } = params;
+    const {
+      query,
+      model,
+      session_id,
+      table_name,
+      composeSubAnswers,
+      decompose,
+      aiRerank,
+      contextExpand,
+      verify,
+      retrievalK,
+      contextWindowSize,
+      rerankerTopK,
+      searchType,
+      denseWeight,
+      forceRag,
+      provencePrune,
+    } = params;
 
     const payload: Record<string, unknown> = { query };
     if (model) payload.model = model;
     if (session_id) payload.session_id = session_id;
     if (table_name) payload.table_name = table_name;
-    if (typeof composeSubAnswers === 'boolean') payload.compose_sub_answers = composeSubAnswers;
+    if (typeof composeSubAnswers === 'boolean')
+      payload.compose_sub_answers = composeSubAnswers;
     if (typeof decompose === 'boolean') payload.query_decompose = decompose;
     if (typeof aiRerank === 'boolean') payload.ai_rerank = aiRerank;
-    if (typeof contextExpand === 'boolean') payload.context_expand = contextExpand;
+    if (typeof contextExpand === 'boolean')
+      payload.context_expand = contextExpand;
     if (typeof verify === 'boolean') payload.verify = verify;
     // ✨ ADD NEW RETRIEVAL PARAMETERS TO PAYLOAD
     if (typeof retrievalK === 'number') payload.retrieval_k = retrievalK;
-    if (typeof contextWindowSize === 'number') payload.context_window_size = contextWindowSize;
+    if (typeof contextWindowSize === 'number')
+      payload.context_window_size = contextWindowSize;
     if (typeof rerankerTopK === 'number') payload.reranker_top_k = rerankerTopK;
     if (typeof searchType === 'string') payload.search_type = searchType;
     if (typeof denseWeight === 'number') payload.dense_weight = denseWeight;
     if (typeof forceRag === 'boolean') payload.force_rag = forceRag;
-    if (typeof provencePrune === 'boolean') payload.provence_prune = provencePrune;
+    if (typeof provencePrune === 'boolean')
+      payload.provence_prune = provencePrune;
 
     const resp = await fetch('http://localhost:8001/chat/stream', {
       method: 'POST',
@@ -618,7 +767,9 @@ class ChatAPI {
           onEvent(evt);
           if (evt.type === 'complete') {
             // Gracefully close the stream so the caller unblocks
-            try { await reader.cancel(); } catch {}
+            try {
+              await reader.cancel();
+            } catch {}
             streamClosed = true;
             break;
           }
@@ -630,4 +781,4 @@ class ChatAPI {
   }
 }
 
-export const chatAPI = new ChatAPI(); 
+export const chatAPI = new ChatAPI();
